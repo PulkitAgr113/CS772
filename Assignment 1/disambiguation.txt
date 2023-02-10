@@ -1,0 +1,28 @@
+Danish	Danes
+Australian	Australians
+Swedish	Swedes
+Portuguese	Portuguese people
+Dram	Armenian dram
+English	English language  
+krone	Danish krone
+Thai	Thai people
+Norwegian	Norwegians
+Bengaluru	Bangalore
+Real	Brazilian real
+Spanish	Spaniards
+Irish	Irish people
+Dutch	Dutch people
+German	Germans
+Italian	Italians
+Dinar	Algerian dinar
+Croatian	Croatioan people
+Swiss	Swiss people
+Japanese	Japanese people
+Russian	Russians
+Krona	Swedish krona
+Rial	Iranian rial
+Indian	Indian people
+Mexican	Mexicans
+French	French people
+Polish	Polish people
+Korean	Koreans

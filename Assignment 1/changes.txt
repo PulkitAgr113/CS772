@@ -1,0 +1,37 @@
+Changed the following 4 words:
+"Telengana" to "Telangana"
+"Gujurat" to "Gujarat"
+"Maharastra" to "Maharashtra
+"Slovakian" to "Slovaks"
+"Kiev" to "Kyiv"
+"USA" to "United States"
+
+Disambiguated the following 28 words:
+Danish
+Australian
+Swedish
+Portuguese
+Dram
+English
+krone
+Thai
+Norwegian
+Bengaluru
+Real
+Spanish
+Irish
+Dutch
+German
+Italian
+Dinar
+Croatian
+Swiss
+Japanese
+Russian
+Krona
+Rial
+Indian
+Mexican
+French
+Polish
+Korean
