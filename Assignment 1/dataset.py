@@ -1,13 +1,10 @@
-import nltk
-# nltk.download('stopwords')
-# nltk.download('punkt')
 from nltk.corpus import gutenberg
 import requests
 from bs4 import BeautifulSoup
 import re
 from nltk.corpus import stopwords
-from nltk.tokenize import word_tokenize
-import numpy as np
+from nltk.corpus import wordnet as wn
+import json
 
 def get_gutenberg_sents():
     fileids = gutenberg.fileids()
@@ -63,14 +60,15 @@ def disambiguated_words():
 def changed_words():
     return {"Gujurat": "Gujarat", "Telengana": "Telangana",
             "Maharastra": "Maharashtra", "Slovakian": "Slovaks",
-            "Kiev" : "Kyiv", "US": "United States"}
+            "Kiev" : "Kyiv", "USA": "United States"}
 
 def analogy_dataset():
     k = 20
     augmented_sents = []
     disambiguated = disambiguated_words()
     changed = changed_words()
-    for word in training_words():
+    new_words = training_words()
+    for word in new_words:
         title = disambiguated.get(word, word)
         title = changed.get(title, title)
         word = changed.get(word, word)
@@ -82,16 +80,17 @@ def analogy_dataset():
         for sent in augmented_sents:
             file.write(sent + "\n")
 
+    print(f"Sentence creation from training data completed")
+
 def clean_sents(sents):
     stop_words = set(stopwords.words('english'))
     filtered_sents = []
     for sent in sents:
         filtered_sent = []
         for w in sent:
-            #doubt
-            if w not in stop_words and re.match('[a-zA-Z]+',w):
+            if w not in stop_words and re.match('[a-zA-Z]+',w) and len(w)>1 and len(wn.synsets(w))>0:
                 filtered_sent.append(w.lower())
-        if(len(filtered_sent)>4):
+        if len(filtered_sent)>4:
             filtered_sents.append(filtered_sent)
     return filtered_sents
 
@@ -101,29 +100,46 @@ def get_merged_sents():
         analogy_sents = f.readlines()
     a_sents=[]
     for sent in analogy_sents: 
-        a_sents.append(sent.strip().split()) 
+        a_sents.append(re.split(' |\(|\)|-|\'|\"|,', sent.strip())) 
+
     analogy_sents=a_sents
     cleaned_sents_analogy=clean_sents(analogy_sents)
     merged_sents.extend(cleaned_sents_analogy)
+    print("Pre-processing of augmented sentences completed")
     cleaned_sents_gutenberg=clean_sents(get_gutenberg_sents())
     merged_sents.extend(cleaned_sents_gutenberg)
-    return merged_sents
+    print("Pre-processing of Gutenberg sentences completed")
 
-def get_one_hot_encoding(sents):
+    with open("training_sents.txt", "w") as file:
+        for sent in merged_sents:
+            for word in sent:
+                file.write(word + " ")
+            file.write("\n")
+
+def get_one_hot_encoding():
+    merged_sents = []
+    with open("training_sents.txt", "r") as file:
+        for sent in file:
+            merged_sents.append(sent.strip().split())
+
     vocab = set()
-    for sent in sents:
+    for sent in merged_sents:
         for word in sent:
             vocab.add(word)
 
-    vocab=list(vocab)
+    vocab = list(vocab)
+    vocab_size = len(vocab)
+    print(f"Vocabulary size: {vocab_size}")
     vocab_dict={}
-    for i in range(len(vocab)):
-        vec=np.zeros(len(vocab))
-        vec[i]=1
-        vocab_dict[vocab[i]]=vec
-    return vocab_dict
+    for i in range(vocab_size):
+        vocab_dict[vocab[i]]=i
+    
+    with open("vocab.json", "w") as file:
+        json.dump(vocab_dict, file)
 
-merged_sents=get_merged_sents()
-encoding=get_one_hot_encoding(merged_sents)
-print(len(merged_sents),len(encoding))
-print(encoding['india'])
+    print("Created vocabulary")
+    return vocab_size
+
+# analogy_dataset()
+# get_merged_sents()
+get_one_hot_encoding()
