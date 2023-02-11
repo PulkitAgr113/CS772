@@ -116,7 +116,7 @@ def get_merged_sents():
                 file.write(word + " ")
             file.write("\n")
 
-def get_one_hot_encoding():
+def get_vocab():
     merged_sents = []
     with open("training_sents.txt", "r") as file:
         for sent in file:
@@ -137,8 +137,8 @@ def get_one_hot_encoding():
     with open("vocab.json", "w") as file:
         json.dump(vocab_dict, file)
 
-    print("Created vocabulary")
+    print("Created vocabulary")                
 
 # analogy_dataset()
 # get_merged_sents()
-# get_one_hot_encoding()
+# get_vocab()

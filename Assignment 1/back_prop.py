@@ -4,7 +4,8 @@ class FCLayer:
     def __init__(self, input_size, output_size):
         self.input_size = input_size
         self.output_size = output_size
-        self.weights = np.random.rand(input_size,output_size)-0.5
+        # self.weights = np.random.rand(input_size,output_size)-0.5
+        self.weights = np.zeros((input_size,output_size))
         self.bias = np.random.rand(output_size)-0.5
         self.input=None
 
@@ -32,7 +33,7 @@ class FCLayer:
         '''
         output_error_new = output_error@(self.weights.T)
         dev_w = (self.input.T)@output_error
-        dev_b = np.squeeze(output_error)
+        dev_b = np.squeeze(np.sum(output_error,axis=0))
         return dev_w, dev_b, output_error_new       
     
 class SoftmaxLayer:
@@ -43,26 +44,10 @@ class SoftmaxLayer:
     def forward(self, input):
         self.input = input
         input = input.clip(min=-700,max=700)
-        return np.exp(input)/(np.exp(input).sum())
-        
-    def backward(self, output_error):
-        '''
-        Performs a backward pass of a Softmax layer
-        Args:
-          output_error :  numpy array 
-          learning_rate: float
-
-        Returns:
-          Numpy array resulting from the backward pass
-        '''
-        S=np.exp(self.input)/np.exp(self.input).sum()
-        I_S=np.diag(np.squeeze(S))
-        S_dev=I_S-1*S.T@S
-        output_error = output_error@S_dev
-        return output_error        
+        return np.exp(input)/(np.sum(np.exp(input),axis=1).reshape(-1,1)+1e-9)   
     
 def cross_entropy(y_true, y_pred):
-    loss = (np.log(y_pred+1e-9).T)[y_true]
+    loss = -np.mean(np.log(y_pred+1e-9)*y_true)
     return loss
 
 def cross_entropy_and_softmax_prime(y_true, y_pred):
@@ -73,9 +58,7 @@ def cross_entropy_and_softmax_prime(y_true, y_pred):
     Returns:
         Numpy array after applying derivative of cross entropy function
     '''
-    y_tr=np.zeros(y_pred.shape)
-    y_tr[0,y_true]=1
-    y_t=y_pred-y_tr
+    y_t=y_pred-y_true
     return y_t                
         
 class Model:
@@ -86,7 +69,6 @@ class Model:
         self.sm=SoftmaxLayer(vocab_size)
 
     def hidden_layer(self,input):
-        input = np.reshape(input,(1,)+input.shape)
         out=self.fc1.forward(input)
         return out
     
