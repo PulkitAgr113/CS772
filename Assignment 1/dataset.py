@@ -1,7 +1,13 @@
+import nltk
+# nltk.download('stopwords')
+# nltk.download('punkt')
 from nltk.corpus import gutenberg
 import requests
 from bs4 import BeautifulSoup
 import re
+from nltk.corpus import stopwords
+from nltk.tokenize import word_tokenize
+import numpy as np
 
 def get_gutenberg_sents():
     fileids = gutenberg.fileids()
@@ -76,4 +82,48 @@ def analogy_dataset():
         for sent in augmented_sents:
             file.write(sent + "\n")
 
-analogy_dataset()
+def clean_sents(sents):
+    stop_words = set(stopwords.words('english'))
+    filtered_sents = []
+    for sent in sents:
+        filtered_sent = []
+        for w in sent:
+            #doubt
+            if w not in stop_words and re.match('[a-zA-Z]+',w):
+                filtered_sent.append(w.lower())
+        if(len(filtered_sent)>4):
+            filtered_sents.append(filtered_sent)
+    return filtered_sents
+
+def get_merged_sents():
+    merged_sents=[]
+    with open('analogy_sentences.txt') as f:
+        analogy_sents = f.readlines()
+    a_sents=[]
+    for sent in analogy_sents: 
+        a_sents.append(sent.strip().split()) 
+    analogy_sents=a_sents
+    cleaned_sents_analogy=clean_sents(analogy_sents)
+    merged_sents.extend(cleaned_sents_analogy)
+    cleaned_sents_gutenberg=clean_sents(get_gutenberg_sents())
+    merged_sents.extend(cleaned_sents_gutenberg)
+    return merged_sents
+
+def get_one_hot_encoding(sents):
+    vocab = set()
+    for sent in sents:
+        for word in sent:
+            vocab.add(word)
+
+    vocab=list(vocab)
+    vocab_dict={}
+    for i in range(len(vocab)):
+        vec=np.zeros(len(vocab))
+        vec[i]=1
+        vocab_dict[vocab[i]]=vec
+    return vocab_dict
+
+merged_sents=get_merged_sents()
+encoding=get_one_hot_encoding(merged_sents)
+print(len(merged_sents),len(encoding))
+print(encoding['india'])
