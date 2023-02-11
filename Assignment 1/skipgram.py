@@ -20,7 +20,7 @@ def run(epoch, model, vocab_dict, train_sents):
             input_word = words[ind]
             input_ind = int(vocab_dict[input_word])
             input_vec[input_ind] = 1
-            pred_vec = model.forward(input_vec)
+            pred_vec = model.output_layer(model.hidden_layer(input_vec))
             input_vec[input_ind] = 0
 
             err = 0
@@ -30,10 +30,7 @@ def run(epoch, model, vocab_dict, train_sents):
                 output_word = words[out_ind]
                 output_ind = int(vocab_dict[output_word])
                 dev_w_fc1, dev_b_fc1, dev_w_fc2, dev_b_fc2 = model.get_update_calc(output_ind, pred_vec)
-                print("update done")
                 err += model.get_error(output_ind, pred_vec)
-                print("error calculated")
-
                 if out_ind == ind-2:
                     w_fc1_upd, b_fc1_upd, w_fc2_upd, b_fc2_upd = dev_w_fc1, dev_b_fc1, dev_w_fc2, dev_b_fc2
                 else:
