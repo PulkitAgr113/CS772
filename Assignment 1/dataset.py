@@ -138,8 +138,7 @@ def get_one_hot_encoding():
         json.dump(vocab_dict, file)
 
     print("Created vocabulary")
-    return vocab_size
 
 # analogy_dataset()
 # get_merged_sents()
-get_one_hot_encoding()
+# get_one_hot_encoding()

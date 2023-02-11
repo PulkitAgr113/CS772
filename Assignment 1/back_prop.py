@@ -1,106 +1,5 @@
 import numpy as np
-from matplotlib import pyplot as plt
-import math
-import pickle as pkl
 
-std_g=None
-mean_g=None
-
-# def preprocessing(X):
-#     """
-#     Args:
-#     X : numpy array of shape (n_samples, n_features)
-    
-#     Returns:
-#     X_out: numpy array of shape (n_samples, n_features) after normalization
-#     """
-#     mean=np.mean(X,axis=0)
-#     std=np.std(X,axis=0)
-#     global std_g
-#     std_g = std
-#     global mean_g
-#     mean_g = mean
-#     X_out=(X-mean)/(std+1e-9)
-#     min=np.min(X_out,axis=0)
-#     max=np.max(X_out,axis=0)
-#     X_out=(X_out-min)/(max-min+1e-9)
-
-#     assert X_out.shape == X.shape
-
-#     return X_out
-
-# def split_data(X, Y, train_ratio=0.8):
-#     '''
-#     Split data into train and validation sets
-#     The first floor(train_ratio*n_sample) samples form the train set
-#     and the remaining the validation set
-
-#     Args:
-#     X - numpy array of shape (n_samples, n_features)
-#     Y - numpy array of shape (n_samples, 1)
-#     train_ratio - fraction of samples to be used as training data
-
-#     Returns:
-#     X_train, Y_train, X_val, Y_val
-#     '''
-#     # Try Normalization and scaling and store it in X_transformed
-
-#     X_transformed = preprocessing(X)
-
-#     assert X_transformed.shape == X.shape
-
-#     num_samples = len(X)
-#     indices = np.arange(num_samples)
-#     num_train_samples = math.floor(num_samples * train_ratio)
-#     train_indices = np.random.choice(indices, num_train_samples, replace=False)
-#     val_indices = list(set(indices) - set(train_indices))
-#     X_train, Y_train, X_val, Y_val = X_transformed[train_indices], Y[train_indices], X_transformed[val_indices], Y[val_indices]
-  
-#     return X_train, Y_train, X_val, Y_val
-
-# class FlattenLayer:
-#     '''
-#     This class converts a multi-dimensional into 1-d vector
-#     '''
-#     def __init__(self, input_shape):
-#         '''
-#         Args:
-#          input_shape : Original shape, tuple of ints
-#         '''
-#         self.input_shape = input_shape
-
-#     def forward(self, input):
-#         '''
-#         Converts a multi-dimensional into 1-d vector
-#         Args:
-#           input : training data, numpy array of shape (n_samples , self.input_shape)
-
-#         Returns:
-#           input: training data, numpy array of shape (n_samples , -1)
-#         '''
-#         ## TODO
-
-#         #Modify the return statement to return flattened input
-#         return np.reshape(input,(input.shape[0],-1))
-#         ## END TODO
-        
-    
-#     def backward(self, output_error, learning_rate):
-#         '''
-#         Converts back the passed array to original dimention 
-#         Args:
-#         output_error :  numpy array 
-#         learning_rate: float
-
-#         Returns:
-#         output_error: A reshaped numpy array to allow backward pass
-#         '''
-#         ## TODO
-
-#         #Modify the return statement to return reshaped array
-#         return np.reshape(output_error,(output_error.shape[0],)+self.input_shape)
-#         ## END TODO
-        
         
 class FCLayer:
     def __init__(self, input_size, output_size):
@@ -135,9 +34,7 @@ class FCLayer:
         output_error_new = output_error@(self.weights.T)
         dev_w = (self.input.T)@output_error
         dev_b = np.squeeze(output_error)
-        self.weights -= learning_rate*dev_w
-        self.bias -= learning_rate*dev_b
-        return output_error_new
+        return dev_w, dev_b, output_error_new
         
         
 class ActivationLayer:
@@ -219,7 +116,7 @@ def relu_prime(x):
     return x
     
 def cross_entropy(y_true, y_pred):
-    loss = np.sum(-np.choose(y_true, np.log(y_pred+1e-9).T))
+    loss = (np.log(y_pred+1e-9).T)[y_true]
     return loss
 
 def cross_entropy_prime(y_true, y_pred):
@@ -231,121 +128,86 @@ def cross_entropy_prime(y_true, y_pred):
         Numpy array after applying derivative of cross entropy function
     '''
     y_t=np.zeros(y_pred.shape)
-    y_t[0,y_true]=np.choose(y_true, (-1/y_pred).T)
+    y_t[0,y_true]=((-1/y_pred).T)[y_true]
     np.reshape(y_t,(1,)+y_t.shape)
     return y_t
 
-def mss(y_true, y_pred):
-    loss = np.sum((y_true-y_pred)**2)
-    return loss
+# def fit(X_train, Y_train, dataset_name):
 
-def mss_prime(y_true, y_pred):
-    return 2*(y_pred-y_true)
-
-
-def fit(X_train, Y_train, dataset_name):
-
-    '''
-    Args:
-        X_train -- np array of share (num_train, vocab_size) 
-        Y_train -- np array of share (num_train, vocab_size)     
-    '''
+#     '''
+#     Args:
+#         X_train -- np array of share (num_train, vocab_size) 
+#         Y_train -- np array of share (num_train, vocab_size)     
+#     '''
 
 
-    vocab_size = None
-    embedding_dim = None    
+#     vocab_size = None
+#     embedding_dim = None    
 
-    network = [
-        FCLayer(vocab_size, embedding_dim),
-        ActivationLayer(sigmoid, sigmoid_prime),
-        FCLayer(embedding_dim, vocab_size),
-        SoftmaxLayer(vocab_size)
-    ] 
+#     network = [
+#         FCLayer(vocab_size, embedding_dim),
+#         ActivationLayer(sigmoid, sigmoid_prime),
+#         FCLayer(embedding_dim, vocab_size),
+#         SoftmaxLayer(vocab_size)
+#     ] 
 
-    epochs = 40
-    learning_rate = 0.01
+#     epochs = 40
+#     learning_rate = 0.01
 
-    for epoch in range(epochs):
-        error = 0
-        for x, y_true in zip(X_train, Y_train):
-            output = np.reshape(x,(1,)+x.shape)
-            for layer in network:
-                output = layer.forward(output)
+#     for epoch in range(epochs):
+#         error = 0
+#         for x, y_true in zip(X_train, Y_train):
+#             output = np.reshape(x,(1,)+x.shape)
+#             for layer in network:
+#                 output = layer.forward(output)
             
-            error += cross_entropy(y_true, output)
-            output_error = cross_entropy_prime(y_true, output)
-            for layer in reversed(network):
-                output_error = layer.backward(output_error, learning_rate)
+#             error += cross_entropy(y_true, output)
+#             output_error = cross_entropy_prime(y_true, output)
+#             for layer in reversed(network):
+#                 output_error = layer.backward(output_error, learning_rate)
         
-        error /= len(X_train)
-        print('%d/%d, error=%f' % (epoch + 1, epochs, error))
+#         error /= len(X_train)
+#         print('%d/%d, error=%f' % (epoch + 1, epochs, error))
 
-    network_dict = {}
+#     network_dict = {}
 
-    network_dict['network'] = network
-    with open(f'model.pkl', 'wb') as files:
-        pkl.dump(network_dict, files)
+#     network_dict['network'] = network
+#     with open(f'model.pkl', 'wb') as files:
+#         pkl.dump(network_dict, files)
     
-# def predict(X_test, dataset_name):
-#     """
-
-#     X_test -- np array of share (num_test, 2048) for flowers and (num_test, 28, 28) for mnist.
-
-#     This is the function that we will call from the auto grader. 
-
-#     This function should only perform inference, please donot train your models here.
-
-#     Steps to be done here:
-#     1. Load your trained model/weights from ./models/{dataset_name}_model.pkl
-#     2. Ensure that you read model/weights using only the libraries we have given above.
-#     3. In case you have saved weights only in your file, itialize your model with your trained weights.
-#     4. Compute the predicted labels and return it
-
-#     Return:
-#     Y_test - nparray of shape (num_test,)
-#     """
-#     Y_test = np.zeros(X_test.shape[0],)
-
-#     ## TODO
-#     with open(f'./models/{dataset_name}_model.pkl', 'rb') as files:
-#         network_dict = pkl.load(files)
-
-#     network = network_dict['network']
-#     mean=network_dict['mean']
-#     std=network_dict['std']
-#     pred = []
-
-#     # Note: Here I have assumed that predict is taking a raw X_test 
-#     # But if it is not taking such an x than please comment the following  line
-
-#     # mean=np.mean(X_test,axis=0)
-#     # std=np.std(X_test,axis=0)
-#     X_test=(X_test-mean)/(std+1e-9)
-#     min=np.min(X_test,axis=0)
-#     max=np.max(X_test,axis=0)
-#     X_test=(X_test-min)/(max-min+1e-9)
-
-#     # X_test = preprocessing(X_test)
-
-#     for x in X_test:
-#         # forward
-#         # print(x)
-#         output = np.reshape(x,(1,)+x.shape)
-#         for layer in network:
-#             output = layer.forward(output)
-#         pred.append(np.argmax(output,axis=1))    
-
-#     Y_test = np.squeeze(np.array(pred))
     
-#     ## END TODO
-#     assert Y_test.shape == (X_test.shape[0],) and type(Y_test) == type(X_test), "Check what you return"
-#     return Y_test
-    
-if __name__ == "__main__":    
-    np.random.seed(0)
-    
-    # X_train, Y_train= 
+                
+        
+class Model:
+    def __init__(self, vocab_size, embedding_dim, lr):
+        self.lr=lr
+        self.fc1=FCLayer(vocab_size, embedding_dim)
+        self.ac1=ActivationLayer(sigmoid, sigmoid_prime)
+        self.fc2=FCLayer(embedding_dim, vocab_size)
+        self.sm=SoftmaxLayer(vocab_size)
 
-    # write_similar to following
-    # preprocessed_X = preprocessing(train_mnist[0])
-    # fit(preprocessed_X,train[1],dataset)
+    def forward(self,input):
+        input = np.reshape(input,(1,)+input.shape)
+        out=self.fc1.forward(input)
+        out=self.ac1.forward(out)
+        out=self.fc2.forward(out)
+        out=self.sm.forward(out)
+        return out
+
+    def get_error(self, y_true, y_pred):
+        return cross_entropy(y_true,y_pred)
+
+    def get_update_calc(self, y_true, y_pred):
+        output_error=cross_entropy_prime(y_true, y_pred)
+        output_error=self.sm.backward(output_error, self.lr)
+        dev_w_fc2, dev_b_fc2, output_error=self.fc2.backward(output_error, self.lr)
+        output_error=self.ac1.backward(output_error, self.lr)
+        dev_w_fc1, dev_b_fc1, output_error=self.fc1.backward(output_error, self.lr)
+        return dev_w_fc1, dev_b_fc1, dev_w_fc2, dev_b_fc2
+    
+    def update_wb(self, dev_w_fc1, dev_b_fc1, dev_w_fc2, dev_b_fc2):
+        self.fc1.weights-=self.lr*(dev_w_fc1)
+        self.fc1.bias-=self.lr*(dev_b_fc1)
+        self.fc2.weights-=self.lr*(dev_w_fc2)
+        self.fc2.bias-=self.lr*(dev_b_fc2)
+
