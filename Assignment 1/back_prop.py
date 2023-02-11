@@ -43,11 +43,11 @@ class SoftmaxLayer:
     
     def forward(self, input):
         self.input = input
-        input = input.clip(min=-700,max=700)
+        input = input.clip(min=-350,max=350)
         return np.exp(input)/(np.sum(np.exp(input),axis=1).reshape(-1,1)+1e-9)   
     
 def cross_entropy(y_true, y_pred):
-    loss = -np.mean(np.log(y_pred+1e-9)*y_true)
+    loss = - np.sum(np.log(y_pred+1e-9)*y_true) / len(y_true)
     return loss
 
 def cross_entropy_and_softmax_prime(y_true, y_pred):

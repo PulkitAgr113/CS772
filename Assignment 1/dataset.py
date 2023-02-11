@@ -5,6 +5,7 @@ import re
 from nltk.corpus import stopwords
 from nltk.corpus import wordnet as wn
 import json
+from utils import changed_words
 
 def get_gutenberg_sents():
     fileids = gutenberg.fileids()
@@ -56,11 +57,6 @@ def disambiguated_words():
             dis_word = line.split("\t")[1]
             disambiguated[word] = dis_word.strip()
     return disambiguated
-
-def changed_words():
-    return {"Gujurat": "Gujarat", "Telengana": "Telangana",
-            "Maharastra": "Maharashtra", "Slovakian": "Slovaks",
-            "Kiev" : "Kyiv", "USA": "United States"}
 
 def analogy_dataset():
     k = 20

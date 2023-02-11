@@ -18,6 +18,11 @@ class Pentagram(Dataset):
     
     def __getitem__(self, idx):
         return self.pentagrams[idx]
+    
+def changed_words():
+    return {"Gujurat": "Gujarat", "Telengana": "Telangana",
+            "Maharastra": "Maharashtra", "Slovakian": "Slovaks",
+            "Kiev" : "Kyiv", "USA": "United States"}
 
 def vocab():
     with open("vocab.json", 'r') as file:
@@ -35,7 +40,7 @@ def params():
     vocab_dict = vocab()
     embedding_dim = 100
     lr = 0.1
-    epochs = 2
+    epochs = 10
     batch_size = 128
     model = Model(len(vocab_dict), embedding_dim, lr)
 
