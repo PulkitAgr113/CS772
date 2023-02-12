@@ -1,4 +1,4 @@
-import json
+import json,torch
 from torch.utils.data import Dataset
 import numpy as np
 from back_prop import Model
@@ -22,25 +22,36 @@ class Pentagram(Dataset):
 def changed_words():
     return {"Gujurat": "Gujarat", "Telengana": "Telangana",
             "Maharastra": "Maharashtra", "Slovakian": "Slovaks",
-            "Kiev" : "Kyiv", "USA": "United States"}
+            "Kiev" : "Kyiv", "USA": "United States", "Bengaluru": "Bangalore"}
 
 def vocab():
     with open("vocab.json", 'r') as file:
         vocab_dict = json.load(file)
     return vocab_dict
 
+def vocab_inv():
+    vocab_dict_inv = {}
+    vocab_dict = vocab()
+    for word in vocab_dict:
+        id = vocab_dict[word]
+        vocab_dict_inv[id] = word
+
+    return vocab_dict_inv
+
 def get_one_hot_encoding(vocab_dict, words):
+    device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
     vocab_size = len(vocab_dict)
     inds = np.array(list(map(lambda x: int(vocab_dict[x]), words)))
     vecs = np.zeros((inds.size, vocab_size))
     vecs[np.arange(inds.size), inds] = 1
+    vecs = torch.from_numpy(vecs).float().to(device)
     return vecs
 
 def params():
     vocab_dict = vocab()
     embedding_dim = 100
     lr = 0.1
-    epochs = 10
+    epochs = 1
     batch_size = 128
     model = Model(len(vocab_dict), embedding_dim, lr)
 
