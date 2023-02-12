@@ -13,7 +13,12 @@ class Similar:
     def most_similar(self, ind1, ind2, ind3):
         vec = self.weight_embeds[ind3]-self.weight_embeds[ind1]+self.weight_embeds[ind2]
         similarity_vecs = cosine_similarity(vec, self.weight_embeds)        
-        return np.argmax(similarity_vecs)
+        ind = np.argpartition(similarity_vecs, -5)[-5:]
+        # ind=np.argmax(similarity_vecs)     
+        if ind[0]!=ind1:
+            return ind[0]
+        else:
+            return ind[1]
     
     def accuracy(self):
         corr = 0
@@ -26,7 +31,7 @@ class Similar:
                 ind2 = self.vocab_dict.get(changed.get(words[0], words[0]),0)
                 ind3 = self.vocab_dict.get(changed.get(words[0], words[0]),0)
                 pred_ind = self.most_similar(ind1, ind2, ind3)
-                if list(self.vocab_dict.values()).index(pred_ind) == changed.get(words[3], words[3]):
+                if [word for word in self.vocab_dict if self.vocab_dict[word]==pred_ind] == changed.get(words[3], words[3]):
                     corr += 1
                 tot += 1
 

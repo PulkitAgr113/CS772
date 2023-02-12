@@ -4,36 +4,18 @@ class FCLayer:
     def __init__(self, input_size, output_size):
         self.input_size = input_size
         self.output_size = output_size
-        # self.weights = np.random.rand(input_size,output_size)-0.5
-        self.weights = np.zeros((input_size,output_size))
+        self.weights = np.random.rand(input_size,output_size)-0.5
         self.bias = np.random.rand(output_size)-0.5
         self.input=None
 
     def forward(self, input):
-        '''
-        Performs a forward pass of a fully connected network
-        Args:
-          input : training data, numpy array of shape (n_samples , self.input_size)
-
-        Returns:
-           numpy array of shape (n_samples , self.output_size)
-        '''
         self.input = input
-        return input@self.weights+self.bias        
+        return input@self.weights+self.bias  
 
     def backward(self, output_error):
-        '''
-        Performs a backward pass of a fully connected network along with updating the parameter 
-        Args:
-          output_error :  numpy array 
-          learning_rate: float
-
-        Returns:
-          Numpy array resulting from the backward pass
-        '''
         output_error_new = output_error@(self.weights.T)
-        dev_w = (self.input.T)@output_error
-        dev_b = np.squeeze(np.sum(output_error,axis=0))
+        dev_w = (self.input.T)@output_error/self.input.shape[0]
+        dev_b = np.squeeze(np.sum(output_error,axis=0))/self.input.shape[0]
         return dev_w, dev_b, output_error_new       
     
 class SoftmaxLayer:
@@ -44,20 +26,13 @@ class SoftmaxLayer:
     def forward(self, input):
         self.input = input
         input = input.clip(min=-350,max=350)
-        return np.exp(input)/(np.sum(np.exp(input),axis=1).reshape(-1,1)+1e-9)   
+        return np.exp(input-np.max(input,axis=1).reshape(-1,1))/(np.sum(np.exp(input-np.max(input,axis=1).reshape(-1,1)),axis=1).reshape(-1,1)+1e-9)   
     
 def cross_entropy(y_true, y_pred):
     loss = - np.sum(np.log(y_pred+1e-9)*y_true) / len(y_true)
     return loss
 
 def cross_entropy_and_softmax_prime(y_true, y_pred):
-    '''
-    Implements derivative of cross entropy function, for the backward pass
-    Args:
-        x :  numpy array 
-    Returns:
-        Numpy array after applying derivative of cross entropy function
-    '''
     y_t=y_pred-y_true
     return y_t                
         
