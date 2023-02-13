@@ -7,7 +7,7 @@ class FCLayer:
         self.output_size = output_size
         # self.weights = np.random.rand(input_size,output_size)-0.5
         # self.bias = np.random.rand(output_size)-0.5
-        device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+        device = torch.device("cuda:7" if torch.cuda.is_available() else "cpu")
         self.weights = torch.rand(input_size,output_size).to(device)-0.5
         self.bias = torch.rand(output_size).to(device)-0.5
         self.input=None

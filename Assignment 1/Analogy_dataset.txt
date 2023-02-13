@@ -50,4 +50,5 @@ Japan Japanese Australia Australian
 Italy Italian Ireland Irish
 Croatia Croatian France French
 Denmark Danish Germany German
-
+King Queen Man Woman
+Delhi India Paris France

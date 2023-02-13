@@ -83,11 +83,13 @@ def clean_sents(sents):
     for sent in sents:
         filtered_sent = []
         for w in sent:
-            if w not in stop_words and re.match('[a-zA-Z]+',w) and len(w)>1:
-                if len(wn.synsets(w))>0 or w in training_words() or w in changed_words().values():
-                    filtered_sent.append(w.lower())
-        if len(filtered_sent)>4:
-            filtered_sents.append(filtered_sent)
+            # if w not in stop_words and re.match('[a-zA-Z]+',w) and len(w)>1:
+            #     if len(wn.synsets(w))>0 or w in training_words() or w in changed_words().values():
+            #         filtered_sent.append(w.lower())
+            if w not in stop_words and re.match('^[a-zA-Z]+$',w) and len(w)>1:
+                filtered_sent.append(w.lower())
+        # if len(filtered_sent)>4:
+        filtered_sents.append(filtered_sent)
     return filtered_sents
 
 def get_merged_sents():
@@ -106,7 +108,25 @@ def get_merged_sents():
     merged_sents.extend(cleaned_sents_gutenberg)
     print("Pre-processing of Gutenberg sentences completed")
 
-    with open("training_sents.txt", "w") as file:
+    with open("all_training_sents.txt", "w") as file:
+        for sent in merged_sents:
+            for word in sent:
+                file.write(word + " ")
+            file.write("\n")
+
+def get_augmented_sents():
+    with open('analogy_sentences.txt') as f:
+        analogy_sents = f.readlines()
+    a_sents=[]
+    for sent in analogy_sents: 
+        a_sents.append(re.split(' |\(|\)|-|\'|\"|,', sent.strip())) 
+
+    analogy_sents=a_sents
+    cleaned_sents_analogy=clean_sents(analogy_sents)
+    merged_sents = cleaned_sents_analogy
+    print("Pre-processing of augmented sentences completed")
+
+    with open("augmented_sents.txt", "w") as file:
         for sent in merged_sents:
             for word in sent:
                 file.write(word + " ")
@@ -114,7 +134,7 @@ def get_merged_sents():
 
 def get_vocab():
     merged_sents = []
-    with open("training_sents.txt", "r") as file:
+    with open("all_training_sents.txt", "r") as file:
         for sent in file:
             merged_sents.append(sent.strip().split())
 
@@ -130,11 +150,12 @@ def get_vocab():
     for i in range(vocab_size):
         vocab_dict[vocab[i]]=i
     
-    with open("vocab.json", "w") as file:
+    with open("all_vocab.json", "w") as file:
         json.dump(vocab_dict, file)
 
     print("Created vocabulary")                
 
-analogy_dataset()
+# analogy_dataset()
 get_merged_sents()
 get_vocab()
+# get_augmented_sents()

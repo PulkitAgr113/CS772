@@ -1,2 +1,1 @@
-cbow_model.pkl
-skipgram_model.pkl
+*.pkl

@@ -989,3 +989,4 @@ Argentina Peso Iran Rial
 Argentina Peso Japan Yen
 India rupee Iran Rial
 India rupee Denmark krone
+India rupee Indian rupee
