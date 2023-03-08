@@ -1,11 +1,14 @@
 import numpy as np
+import torch
         
 class FCLayer:
     def __init__(self, input_size, output_size):
         self.input_size = input_size
         self.output_size = output_size
-        self.weights = np.random.rand(input_size,output_size)-0.5
-        self.bias = np.random.rand(output_size)-0.5
+        # self.weights = np.random.rand(input_size,output_size)-0.5
+        # self.bias = np.random.rand(output_size)-0.5
+        self.weights = torch.rand(input_size,output_size)-0.5
+        self.bias = torch.rand(output_size)-0.5
         self.input=None
 
     def forward(self, input):
@@ -15,7 +18,8 @@ class FCLayer:
     def backward(self, output_error):
         output_error_new = output_error@(self.weights.T)
         dev_w = (self.input.T)@output_error/self.input.shape[0]
-        dev_b = np.squeeze(np.sum(output_error,axis=0))/self.input.shape[0]
+        # dev_b = np.squeeze(np.sum(output_error,axis=0))/self.input.shape[0]
+        dev_b = torch.squeeze(torch.sum(output_error,axis=0))/self.input.shape[0]
         return dev_w, dev_b, output_error_new       
     
 class SoftmaxLayer:
@@ -26,10 +30,11 @@ class SoftmaxLayer:
     def forward(self, input):
         self.input = input
         input = input.clip(min=-350,max=350)
-        return np.exp(input-np.max(input,axis=1).reshape(-1,1))/(np.sum(np.exp(input-np.max(input,axis=1).reshape(-1,1)),axis=1).reshape(-1,1)+1e-9)   
+        # return np.exp(input-np.max(input,axis=1).reshape(-1,1))/(np.sum(np.exp(input-np.max(input,axis=1).reshape(-1,1)),axis=1).reshape(-1,1)+1e-9)   
+        return torch.exp(input-torch.max(input,axis=1)[0].reshape(-1,1))/(torch.sum(torch.exp(input-torch.max(input,axis=1)[0].reshape(-1,1)),axis=1).reshape(-1,1)+1e-9)   
     
 def cross_entropy(y_true, y_pred):
-    loss = - np.sum(np.log(y_pred+1e-9)*y_true) / len(y_true)
+    loss = - torch.sum(torch.log(y_pred+1e-9)*y_true) / len(y_true)
     return loss
 
 def cross_entropy_and_softmax_prime(y_true, y_pred):

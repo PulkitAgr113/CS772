@@ -59,7 +59,6 @@ def disambiguated_words():
     return disambiguated
 
 def analogy_dataset():
-    k = 20
     augmented_sents = []
     disambiguated = disambiguated_words()
     changed = changed_words()
@@ -69,7 +68,7 @@ def analogy_dataset():
         title = changed.get(title, title)
         word = changed.get(word, word)
         sentences = get_sents(word, title)
-        augmented_sents.extend(sentences[:k])
+        augmented_sents.extend(sentences)
         print(f"Extracted {len(sentences)} sentences for word {word}")
 
     with open("analogy_sentences.txt", "w") as file:
@@ -84,8 +83,9 @@ def clean_sents(sents):
     for sent in sents:
         filtered_sent = []
         for w in sent:
-            if w not in stop_words and re.match('[a-zA-Z]+',w) and len(w)>1 and len(wn.synsets(w))>0:
-                filtered_sent.append(w.lower())
+            if w not in stop_words and re.match('[a-zA-Z]+',w) and len(w)>1:
+                if len(wn.synsets(w))>0 or w in training_words() or w in changed_words().values():
+                    filtered_sent.append(w.lower())
         if len(filtered_sent)>4:
             filtered_sents.append(filtered_sent)
     return filtered_sents
@@ -136,5 +136,5 @@ def get_vocab():
     print("Created vocabulary")                
 
 # analogy_dataset()
-# get_merged_sents()
-# get_vocab()
+get_merged_sents()
+get_vocab()

@@ -2,6 +2,7 @@ import json
 from torch.utils.data import Dataset
 import numpy as np
 from back_prop import Model
+import torch 
 
 class Pentagram(Dataset):
     def __init__(self, train_sents):
@@ -30,10 +31,12 @@ def vocab():
     return vocab_dict
 
 def get_one_hot_encoding(vocab_dict, words):
+    device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
     vocab_size = len(vocab_dict)
     inds = np.array(list(map(lambda x: int(vocab_dict[x]), words)))
     vecs = np.zeros((inds.size, vocab_size))
     vecs[np.arange(inds.size), inds] = 1
+    vecs = torch.from_numpy(vecs).float().to(device)
     return vecs
 
 def params():

@@ -8,9 +8,9 @@ def run_cbow(epoch, model, vocab_dict, batch_size, train_sents, sample_size=1000
     train_tuples = Pentagram(train_sents)
     train_dataloader = DataLoader(train_tuples, batch_size=batch_size, shuffle=True)
     error = 0
-    for idx,item in enumerate(tqdm(train_dataloader, total=sample_size)):
-        if idx >= sample_size:
-            break
+    for idx,item in enumerate(tqdm(train_dataloader)):
+        # if idx >= sample_size:
+        #     break
         for in_ind in [0,1,3,4]:
             input_vecs = get_one_hot_encoding(vocab_dict, item[in_ind])
             if in_ind == 0:

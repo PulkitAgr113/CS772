@@ -1,4 +1,5 @@
 import numpy as np
+import pickle
 from tqdm import tqdm
 from utils import changed_words, vocab
 
@@ -7,7 +8,7 @@ def cosine_similarity(vec, embeds):
 
 class Similar:
     def __init__(self,weights):
-        self.weight_embeds=weights
+        self.weight_embeds=weights.detach().cpu().numpy()
         self.vocab_dict = vocab()
     
     def most_similar(self, ind1, ind2, ind3):
@@ -25,17 +26,24 @@ class Similar:
         tot = 0
         changed = changed_words()
         with open("Validation.txt", "r") as file:
-            for line in tqdm(file.readlines()):
+            for line in file.readlines():
                 words = line.strip().split()
                 ind1 = self.vocab_dict.get(changed.get(words[0], words[0]),0)
                 ind2 = self.vocab_dict.get(changed.get(words[0], words[0]),0)
                 ind3 = self.vocab_dict.get(changed.get(words[0], words[0]),0)
                 pred_ind = self.most_similar(ind1, ind2, ind3)
-                if [word for word in self.vocab_dict if self.vocab_dict[word]==pred_ind] == changed.get(words[3], words[3]):
+                pred_word = [word for word in self.vocab_dict if self.vocab_dict[word] == pred_ind][0]
+                if pred_word == changed.get(words[3], words[3]):
                     corr += 1
                 tot += 1
+                print(pred_word, words[3])
 
         return corr / tot
-
+    
+if __name__ == '__main__':
+    with open("skipgram_model.pkl", "rb") as file:
+        model = pickle.load(file)
+    sim = Similar(model.fc1.weights)
+    print(sim.accuracy())
                 
 

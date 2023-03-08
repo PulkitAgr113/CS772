@@ -7,7 +7,6 @@ English	English language
 krone	Danish krone
 Thai	Thai people
 Norwegian	Norwegians
-Bengaluru	Bangalore
 Real	Brazilian real
 Spanish	Spaniards
 Irish	Irish people
