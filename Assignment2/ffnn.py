@@ -24,37 +24,39 @@ class NeuralNet(nn.Module):
 
 class dataloader(Dataset):
     def __init__(self, folded_train_sents, folded_train_correct_tags, prev_words, tagidxdict, word_vectors_google, input_size, num_classes):
-        inp_out = []
+        inputs = []
+        outputs = []
         for train_sents, train_correct_tags in zip(folded_train_sents, folded_train_correct_tags):
             for sent, correct_tags in zip(train_sents, train_correct_tags):
                 ind = 0
                 for ind in range(len(sent)):
-                    elem = np.zeros(input_size + num_classes)
+                    corr_tag_one_hot = np.zeros(num_classes)
                     corr_tag = correct_tags[ind]
                     idx = tagidxdict[corr_tag]
-                    elem[input_size+idx] = 1
+                    corr_tag_one_hot[idx] = 1
+                    outputs.append(corr_tag_one_hot)
+                    elem = np.zeros(input_size)
                     for word in range(max(ind-prev_words, 0), ind+1):
                         if sent[word] in word_vectors_google:
-                            elem[:input_size] += word_vectors_google[sent[word]]
-                    inp_out.append(elem)
+                            elem += word_vectors_google[sent[word]]
+                    inputs.append(elem)
         
-        self.inp_out = inp_out
+        self.inputs = inputs
+        self.outputs = outputs
                 
     def __len__(self):
-        return len(self.inp_out)
+        return len(self.inputs)
     
     def __getitem__(self, idx):
-        return self.inp_out[idx]
+        return self.inputs[idx], self.outputs[idx]
 
 def run(model, criterion, optimizer, train_sents, train_correct_tags, tagidxdict, word_vectors_google, batch_size, input_size, num_classes, prev_words = 4):
     train_vectors = dataloader(train_sents, train_correct_tags, prev_words, tagidxdict, word_vectors_google, input_size, num_classes)
     train_dataloader = DataLoader(train_vectors, batch_size = batch_size, shuffle=True)
     error = 0
-    for idx,item in enumerate(tqdm(train_dataloader)):
-        input_vec = item[:input_size]
-        output_vec = item[input_size:]
-        pred_vec = model.forward(input_vec)
-        loss = criterion(pred_vec, output_vec)
+    for idx, (input_vecs, output_vecs) in enumerate(tqdm(train_dataloader)):
+        pred_vecs = model(input_vecs)
+        loss = criterion(pred_vecs, output_vecs)
         error += loss.item()
         optimizer.zero_grad()
         loss.backward()
